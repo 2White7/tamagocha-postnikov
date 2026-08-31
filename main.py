@@ -13,7 +13,6 @@ logger = logging.getLogger("tamagocha")
 
 def main():
     state = load_state()
-    print(f"Загружено состояние питомца: {state['name']}")
     logger.info("Loaded state for pet: %s", state["name"])
     pet = Tamagocha(
         state["name"], state["eda"], state["socialka"],
