@@ -21,7 +21,7 @@ def test_tamagocha_init_clamps_out_of_range_stats():
 def test_feed_restores_eda_to_max():
     pet = Tamagocha("Rex", 10, 50, 50, 50, 50)
     pet.feed()
-    assert pet.eda == 999  # BUG: навмисно зламаний тест для демонстрації CI
+    assert pet.eda == 100
 
 
 def test_death_message_reports_lowest_priority_stat():
