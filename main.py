@@ -20,6 +20,7 @@ def main():
         state["bdsm"], state["trash"], state["tired"],
     )
     apply_decay(pet, state["time"])
+    logger.info("Decay applied, entering game loop")
     game_loop(pet)
 
     state["eda"] = pet.eda
@@ -28,6 +29,7 @@ def main():
     state["trash"] = pet.trash
     state["time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     save_state(state)
+    logger.info("Session saved, exiting")
 
 
 if __name__ == "__main__":
