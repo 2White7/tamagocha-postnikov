@@ -3,6 +3,22 @@
 MIN_STAT = 0
 MAX_STAT = 100
 
+STAT_LABELS = {
+    "eda": ("Голод", "Спасибо было вкусно!"),
+    "tired": ("Усталость", "Я выспалась!"),
+    "trash": ("Уровень загрязненности комнаты", "Какая чистота!"),
+    "socialka": ("Потебность в общении", "Я так хорошо погуляла!"),
+    "bdsm": ("Потребность в страданиях", "Это было великолепно!"),
+}
+
+DEATH_MESSAGES = {
+    "eda": "Ваш персонаж умер от голода",
+    "trash": "Ваш персонаж умер в грязи от инфекций",
+    "bdsm": "Ваш персонаж совершил суицид",
+    "tired": "Ваш персонаж устал до смерти",
+    "socialka": "Ваш персонаж умер от одиночества",
+}
+
 
 def clamp(value, low=MIN_STAT, high=MAX_STAT):
     """Обмежує значення показника діапазоном [low, high]."""
@@ -11,6 +27,8 @@ def clamp(value, low=MIN_STAT, high=MAX_STAT):
 
 class Tamagocha:
     """Представляє стан персонажа-тамагочі та його показники."""
+
+    STAT_KEYS = ("eda", "socialka", "bdsm", "trash", "tired")
 
     def __init__(self, name, eda, socialka, bdsm, trash, tired):
         if not name:
@@ -23,44 +41,37 @@ class Tamagocha:
         self.tired = clamp(tired)
 
     def status_text(self):
-        return (
-            "Статус\n" + str(self.name)
-            + "\nГолод = " + str(self.eda)
-            + "\nУсталость = " + str(self.tired)
-            + "\nУровень загрязненности комнаты = " + str(self.trash)
-            + "\nПотебность в общении = " + str(self.socialka)
-            + "\nПотребность в страданиях = " + str(self.bdsm)
-        )
+        lines = ["Статус", str(self.name)]
+        for key in self.STAT_KEYS:
+            label, _ = STAT_LABELS[key]
+            lines.append(label + " = " + str(getattr(self, key)))
+        return "\n".join(lines)
+
+    def restore(self, stat):
+        """Відновлює вказаний показник до максимуму та повертає повідомлення."""
+        if stat not in STAT_LABELS:
+            raise ValueError(f"unknown stat: {stat}")
+        setattr(self, stat, MAX_STAT)
+        label, message = STAT_LABELS[stat]
+        return f"{message}\n{label} = {getattr(self, stat)}"
 
     def feed(self):
-        self.eda = 100
-        return "Спасибо было вкусно!\nГолод = " + str(self.eda)
+        return self.restore("eda")
 
     def sleep(self):
-        self.tired = 100
-        return "Я выспалась!\nУсталость = " + str(self.tired)
+        return self.restore("tired")
 
     def clean(self):
-        self.trash = 100
-        return "Какая чистота!\nУровень загрязнения = " + str(self.trash)
+        return self.restore("trash")
 
     def socialize(self):
-        self.socialka = 100
-        return "Я так хорошо погуляла!\nПотребность в общении = " + str(self.socialka)
+        return self.restore("socialka")
 
     def bdsm_club(self):
-        self.bdsm = 100
-        return "Это было великолепно!\nПотребность в страданиях = " + str(self.bdsm)
+        return self.restore("bdsm")
 
     def death_message(self):
-        if self.eda <= 0:
-            return "Ваш персонаж умер от голода"
-        if self.trash <= 0:
-            return "Ваш персонаж умер в грязи от инфекций"
-        if self.bdsm <= 0:
-            return "Ваш персонаж совершил суицид"
-        if self.tired <= 0:
-            return "Ваш персонаж устал до смерти"
-        if self.socialka <= 0:
-            return "Ваш персонаж умер от одиночества"
+        for key in self.STAT_KEYS:
+            if getattr(self, key) <= 0:
+                return DEATH_MESSAGES[key]
         return None
