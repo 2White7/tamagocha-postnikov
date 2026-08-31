@@ -35,10 +35,25 @@ def run_turn(pet, choice):
     return text
 
 
+def read_choice(input_func=input):
+    """Зчитує вибір користувача та перевіряє, що це число у діапазоні 1-7."""
+    raw = input_func()
+    try:
+        choice = int(raw)
+    except ValueError:
+        return None
+    if choice < 1 or choice > 7:
+        return None
+    return choice
+
+
 def game_loop(pet, input_func=input, print_func=print):
     print_func(MENU_TEXT)
     while True:
-        choice = int(input_func())
+        choice = read_choice(input_func)
+        if choice is None:
+            print_func("Некорректный ввод, введите число от 1 до 7.")
+            continue
         result = run_turn(pet, choice)
         if choice == 7:
             break

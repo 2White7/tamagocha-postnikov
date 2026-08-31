@@ -1,16 +1,26 @@
 """Основна модель персонажа тамагочі."""
 
+MIN_STAT = 0
+MAX_STAT = 100
+
+
+def clamp(value, low=MIN_STAT, high=MAX_STAT):
+    """Обмежує значення показника діапазоном [low, high]."""
+    return max(low, min(high, value))
+
 
 class Tamagocha:
     """Представляє стан персонажа-тамагочі та його показники."""
 
     def __init__(self, name, eda, socialka, bdsm, trash, tired):
+        if not name:
+            raise ValueError("name must not be empty")
         self.name = name
-        self.eda = eda
-        self.socialka = socialka
-        self.bdsm = bdsm
-        self.trash = trash
-        self.tired = tired
+        self.eda = clamp(eda)
+        self.socialka = clamp(socialka)
+        self.bdsm = clamp(bdsm)
+        self.trash = clamp(trash)
+        self.tired = clamp(tired)
 
     def status_text(self):
         return (
