@@ -9,6 +9,7 @@ from tamagocha_pkg.interface import game_loop
 
 def main():
     state = load_state()
+    print(f"Загружено состояние питомца: {state['name']}")
     pet = Tamagocha(
         state["name"], state["eda"], state["socialka"],
         state["bdsm"], state["trash"], state["tired"],
