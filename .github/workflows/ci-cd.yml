@@ -79,8 +79,8 @@ jobs:
       - name: Smoke test (Verification)
         run: |
           echo "Running post-deploy verification..."
-          # Імітація перевірки, що 1=1
-          python -c "assert 1 == 1"
+          # Імітація перевірки, що 1=1 (навмисно зламано, lab3 Частина 4)
+          python -c "assert 1 == 2"
 
   deploy_production:
     name: deploy_production
