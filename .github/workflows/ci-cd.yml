@@ -1,0 +1,99 @@
+name: Blockchain CI
+# (назва job-ів "Blockchain CI" узгоджена з форматом лаб. роботи №3;
+#  проєкт — симулятор тамагочі, назва job-групи історична)
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main, lab3 ]
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          flake8 tamagocha_pkg tests main.py --max-line-length=100 --extend-ignore=E501
+
+      - name: Security scan with bandit
+        run: |
+          bandit -r tamagocha_pkg main.py
+
+      - name: Run unit tests
+        run: |
+          PYTHONPATH=. pytest tests/ -v
+
+  build:
+    name: build
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create build artifact
+        run: |
+          echo "Build version: 1.0.${{ github.run_number }}" > build_info.txt
+          echo "Commit: ${{ github.sha }}" >> build_info.txt
+          echo "Timestamp: $(date)" >> build_info.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamagocha-artifact
+          path: build_info.txt
+
+  deploy_staging:
+    name: deploy_staging
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tamagocha-artifact
+
+      - name: Simulate Staging Deploy
+        run: |
+          echo "Deploying to staging environment..."
+          cat build_info.txt
+
+  verify_staging:
+    name: verify_staging
+    needs: deploy_staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test (Verification)
+        run: |
+          echo "Running post-deploy verification..."
+          # Імітація перевірки, що 1=1
+          python -c "assert 1 == 1"
+
+  deploy_production:
+    name: deploy_production
+    needs: verify_staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tamagocha-artifact
+
+      - name: Final Deploy to Production
+        run: |
+          echo "Deploying to production after manual approval..."
+          cat build_info.txt
